@@ -1,0 +1,554 @@
+/* ========================
+   RESET & BASE
+======================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --yellow: #ffc107;
+  --yellow-dark: #e6a800;
+  --yellow-light: #fff3cd;
+  --bg: #1a1a2e;
+  --bg2: #16213e;
+  --cell-bg: #0f3460;
+  --cell-border: #ffc107;
+  --cell-text: #ffc107;
+  --white: #ffffff;
+  --green: #28c76f;
+  --red: #ea5455;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+html,
+body {
+  height: 100%;
+  font-family: 'Segoe UI', 'Arial Black', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+/* ========================
+   SCREENS
+======================== */
+.screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ========================
+   SCHERMATA INPUT
+======================== */
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.logo-title h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 0 20px rgba(255, 193, 7, 0.6);
+}
+
+.logo-title h1 span {
+  color: var(--yellow);
+  display: block;
+}
+
+.logo-star {
+  font-size: 2.5rem;
+  color: var(--yellow);
+  animation: spin-star 4s linear infinite;
+  text-shadow: 0 0 15px var(--yellow);
+}
+
+@keyframes spin-star {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.input-card {
+  background: var(--bg2);
+  border: 2px solid var(--yellow);
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--shadow), 0 0 30px rgba(255, 193, 7, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-label {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--yellow);
+}
+
+#frase-input {
+  background: var(--cell-bg);
+  border: 2px solid var(--yellow);
+  border-radius: 8px;
+  color: var(--white);
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#frase-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+#frase-input:focus {
+  border-color: var(--white);
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+}
+
+#btn-start {
+  background: var(--yellow);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  padding: 14px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 0 var(--yellow-dark);
+}
+
+#btn-start:hover {
+  background: #ffd54f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--yellow-dark);
+}
+
+#btn-start:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--yellow-dark);
+}
+
+/* ========================
+   GAME SCREEN
+======================== */
+.game-header {
+  width: 100%;
+  text-align: center;
+  padding: 16px 20px;
+  background: var(--bg2);
+  border-bottom: 3px solid var(--yellow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.header-logo {
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.header-logo strong {
+  color: var(--yellow);
+}
+
+.star-small {
+  color: var(--yellow);
+  font-size: 1rem;
+}
+
+/* ========================
+   TABELLONE
+======================== */
+#tabellone-container {
+  width: 100%;
+  max-width: 960px;
+  padding: 30px 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tabellone {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+}
+
+.parola-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+/* Riga con più parole (per frasi corte) */
+.linea-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.cella {
+  width: 46px;
+  height: 56px;
+  border: 3px solid var(--cell-border);
+  border-radius: 6px;
+  background: var(--cell-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.cella.revealed {
+  color: var(--yellow);
+  background: #0a2240;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 12px rgba(255, 193, 7, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: flip-in 0.4s ease;
+}
+
+@keyframes flip-in {
+  0% {
+    transform: scaleY(0);
+  }
+
+  50% {
+    transform: scaleY(1.1);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.cella.flash-correct {
+  background: rgba(40, 199, 111, 0.25);
+  box-shadow: 0 0 20px rgba(40, 199, 111, 0.6);
+}
+
+/* ========================
+   INPUT LETTERA
+======================== */
+#input-area {
+  width: 100%;
+  padding: 20px;
+  background: var(--bg2);
+  border-top: 3px solid var(--yellow);
+}
+
+.lettera-wrapper {
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lettera-wrapper label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.lettera-row {
+  display: flex;
+  gap: 10px;
+}
+
+#lettera-input {
+  width: 64px;
+  height: 54px;
+  background: var(--cell-bg);
+  border: 3px solid var(--yellow);
+  border-radius: 8px;
+  color: var(--yellow);
+  font-size: 1.8rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+
+#lettera-input:focus {
+  border-color: var(--white);
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.5);
+}
+
+#btn-lettera {
+  flex: 1;
+  background: var(--yellow);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 0 var(--yellow-dark);
+}
+
+#btn-lettera:hover {
+  background: #ffd54f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--yellow-dark);
+}
+
+#btn-lettera:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--yellow-dark);
+}
+
+/* ========================
+   FEEDBACK
+======================== */
+.feedback {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  text-transform: uppercase;
+  transition: opacity 0.3s;
+}
+
+.feedback.hidden {
+  display: none;
+}
+
+.feedback.ok {
+  background: rgba(40, 199, 111, 0.2);
+  border: 2px solid var(--green);
+  color: var(--green);
+}
+
+.feedback.no {
+  background: rgba(234, 84, 85, 0.2);
+  border: 2px solid var(--red);
+  color: var(--red);
+}
+
+/* ========================
+   BOTTONE NUOVA FRASE
+======================== */
+#btn-next {
+  margin: 16px auto;
+  display: block;
+  background: transparent;
+  color: var(--yellow);
+  border: 2px solid var(--yellow);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+#btn-next:hover {
+  background: var(--yellow);
+  color: #1a1a2e;
+}
+
+#btn-next.hidden {
+  display: none;
+}
+
+/* ========================
+   SCHERMATA VITTORIA
+======================== */
+#screen-win {
+  background: radial-gradient(circle at center, #1a2f1a 0%, #0d1f0d 100%);
+}
+
+.win-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: pop-in 0.6s cubic-bezier(.17, .67, .25, 1.4);
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.win-stars {
+  font-size: 2rem;
+  color: var(--yellow);
+  letter-spacing: 12px;
+  text-shadow: 0 0 20px var(--yellow);
+  animation: pulse-glow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    text-shadow: 0 0 10px var(--yellow);
+  }
+
+  to {
+    text-shadow: 0 0 40px var(--yellow), 0 0 80px rgba(255, 193, 7, 0.4);
+  }
+}
+
+.win-title {
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 900;
+  color: var(--yellow);
+  letter-spacing: 6px;
+  text-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+}
+
+.win-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#win-frase {
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: rgba(255, 193, 7, 0.1);
+  border: 2px solid var(--yellow);
+  border-radius: 12px;
+  padding: 16px 32px;
+  max-width: 600px;
+}
+
+.btn-win {
+  background: var(--yellow);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 16px 48px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 var(--yellow-dark);
+  transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+}
+
+.btn-win:hover {
+  background: #ffd54f;
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 var(--yellow-dark);
+}
+
+.btn-win:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 var(--yellow-dark);
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 500px) {
+  .cella {
+    width: 36px;
+    height: 44px;
+    font-size: 1.1rem;
+    border-width: 2px;
+  }
+
+  .parola-row {
+    gap: 4px;
+  }
+
+  .linea-row {
+    gap: 8px;
+  }
+
+  .logo-star {
+    font-size: 1.5rem;
+  }
+
+  .input-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .cella {
+    width: 30px;
+    height: 38px;
+    font-size: 0.95rem;
+  }
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruota della Fortuna</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- SCHERMATA INSERIMENTO FRASE -->
+  <div id="screen-input" class="screen active">
+    <div class="logo-title">
+      <div class="logo-star">★</div>
+      <h1>RUOTA DELLA<br><span>FORTUNA</span></h1>
+      <div class="logo-star">★</div>
+    </div>
+    <div class="input-card">
+      <p class="input-label">Inserisci la frase segreta</p>
+      <textarea id="frase-input" placeholder="Es: BUONGIORNO A TUTTI" maxlength="80" rows="3"></textarea>
+      <button id="btn-start" onclick="startGame()">▶ INIZIA IL GIOCO</button>
+    </div>
+  </div>
+
+  <!-- SCHERMATA DI GIOCO -->
+  <div id="screen-game" class="screen">
+    <header class="game-header">
+      <div class="header-logo">
+        <span class="star-small">★</span>
+        RUOTA DELLA <strong>FORTUNA</strong>
+        <span class="star-small">★</span>
+      </div>
+    </header>
+
+    <div id="tabellone-container">
+      <div id="tabellone"></div>
+    </div>
+
+    <div id="input-area">
+      <div class="lettera-wrapper">
+        <label for="lettera-input">Inserisci una lettera:</label>
+        <div class="lettera-row">
+          <input id="lettera-input" type="text" maxlength="1" placeholder="A" autocomplete="off" />
+          <button id="btn-lettera" onclick="checkLettera()">✔ CONFERMA</button>
+        </div>
+        <div id="msg-feedback" class="feedback hidden"></div>
+      </div>
+    </div>
+
+    <button id="btn-next" class="hidden" onclick="newGame()">▶ NUOVA FRASE</button>
+  </div>
+
+  <!-- SCHERMATA VITTORIA -->
+  <div id="screen-win" class="screen">
+    <div class="win-container">
+      <div class="win-stars">★ ★ ★</div>
+      <h2 class="win-title">BRAVO!</h2>
+      <p class="win-subtitle">Hai indovinato la frase!</p>
+      <div id="win-frase"></div>
+      <button onclick="newGame()" class="btn-win">▶ NUOVA FRASE</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+
+</html>
