@@ -1,0 +1,93 @@
+(function () {
+  function splitPhrase(phrase, phraseNorm) {
+    const words = String(phrase || '').split(' ');
+    const normWords = String(phraseNorm || '').split(' ');
+    const max = 14;
+    const rows = [];
+    let current = [];
+    let len = 0;
+
+    words.forEach((word, idx) => {
+      const add = current.length === 0 ? word.length : word.length + 1;
+      if (word.length > max) {
+        if (current.length) rows.push(current);
+        rows.push([{ word, norm: normWords[idx] || '' }]);
+        current = [];
+        len = 0;
+        return;
+      }
+      if (len + add > max && current.length) {
+        rows.push(current);
+        current = [];
+        len = 0;
+      }
+      current.push({ word, norm: normWords[idx] || '' });
+      len += add;
+    });
+
+    if (current.length) rows.push(current);
+    return rows;
+  }
+
+  function renderBoard(container, phrase, phraseNorm, revealed, options) {
+    const opts = options || {};
+    container.innerHTML = '';
+    container.classList.toggle('board-open', !!opts.open);
+
+    splitPhrase(phrase, phraseNorm).forEach(row => {
+      const line = document.createElement('div');
+      line.className = 'linea-row';
+      row.forEach(({ word, norm }) => {
+        const wordEl = document.createElement('div');
+        wordEl.className = 'parola-row';
+        for (let i = 0; i < word.length; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'cella';
+          cell.dataset.norm = norm[i] || '';
+          cell.textContent = word[i];
+          if (opts.open || revealed.has(norm[i]) || !/^[A-Z]$/.test(norm[i] || '')) cell.classList.add('revealed');
+          wordEl.appendChild(cell);
+        }
+        line.appendChild(wordEl);
+      });
+      container.appendChild(line);
+    });
+  }
+
+  function revealLetter(letter) {
+    let count = 0;
+    let delay = 0;
+    document.querySelectorAll('.screen.active .cella').forEach(cell => {
+      if (cell.dataset.norm === letter) {
+        count += 1;
+        setTimeout(() => {
+          cell.classList.add('revealed', 'flash-correct');
+          setTimeout(() => cell.classList.remove('flash-correct'), 500);
+        }, delay);
+        delay += 70;
+      }
+    });
+    return count;
+  }
+
+  function revealAll(revealedSet) {
+    document.querySelectorAll('.screen.active .cella').forEach(cell => {
+      if (cell.dataset.norm) revealedSet.add(cell.dataset.norm);
+      cell.classList.add('revealed');
+    });
+  }
+
+  function isComplete(phraseNorm, revealed) {
+    for (const ch of phraseNorm) {
+      if (/^[A-Z]$/.test(ch) && !revealed.has(ch)) return false;
+    }
+    return true;
+  }
+
+  window.GiroBoard = {
+    renderBoard,
+    revealLetter,
+    revealAll,
+    isComplete
+  };
+})();

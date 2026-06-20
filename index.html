@@ -4,66 +4,281 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruota della Fortuna</title>
+  <title>Il Giro di Mida</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  <div id="modal-info" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 class="modal-title" id="info-title">Avviso</h3>
+      <p class="modal-text" id="info-text"></p>
+      <div class="modal-btn-row" id="info-actions"></div>
+    </div>
+  </div>
 
-  <!-- SCHERMATA INSERIMENTO FRASE -->
-  <div id="screen-input" class="screen active">
+  <div id="modal-solve" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 class="modal-title">Risolvi la frase</h3>
+      <p class="modal-text">Soluzione detta da <b id="solve-name"></b>.</p>
+      <textarea id="solve-input" rows="2" placeholder="Scrivi la risposta"></textarea>
+      <div class="modal-btn-row">
+        <button class="modal-cancel" id="btn-solve-cancel">Annulla</button>
+        <button class="modal-close" id="btn-solve-confirm">Verifica</button>
+      </div>
+    </div>
+  </div>
+
+  <section id="screen-home" class="screen active">
     <div class="logo-title">
       <div class="logo-star">★</div>
-      <h1>RUOTA DELLA<br><span>FORTUNA</span></h1>
+      <h1>IL GIRO<br><span>DI MIDA</span></h1>
+      <div class="logo-star">★</div>
+    </div>
+    <div class="mode-grid">
+      <button class="mode-card" data-mode="main">
+        <span>Partita principale</span>
+        <small>Round I-IV, ruota, punteggi e regia</small>
+      </button>
+      <button class="mode-card" data-mode="flash">
+        <span>Round Flash</span>
+        <small>Spareggio con timer manuale da 5 secondi</small>
+      </button>
+      <button class="mode-card" data-mode="finale">
+        <span>Gioco finale</span>
+        <small>Tabellone 1, Tastiera rotta e timer da 20 secondi</small>
+      </button>
+    </div>
+  </section>
+
+  <section id="screen-setup" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1>PARTECIPANTI</h1>
+      <div class="logo-star">★</div>
+    </div>
+    <div class="setup-card">
+      <p class="input-label">Quanti partecipanti?</p>
+      <div class="count-row">
+        <button class="count-btn" data-n="1">1</button>
+        <button class="count-btn" data-n="2">2</button>
+        <button class="count-btn" data-n="3">3</button>
+      </div>
+      <div id="names-wrap" class="names-wrap"></div>
+      <button id="btn-setup">Continua</button>
+      <button class="btn-link" data-home>← Menu iniziale</button>
+    </div>
+  </section>
+
+  <section id="screen-starter" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1>CHI INIZIA?</h1>
+      <div class="logo-star">★</div>
+    </div>
+    <div class="setup-card">
+      <p class="input-label">Scelta manuale della regia</p>
+      <div id="starter-list" class="choice-list"></div>
+    </div>
+  </section>
+
+  <section id="screen-round" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1>SCEGLI IL ROUND</h1>
+      <div class="logo-star">★</div>
+    </div>
+    <p class="round-prompt" id="round-counter"></p>
+    <div class="round-grid" id="round-grid"></div>
+  </section>
+
+  <section id="screen-input" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1>ROUND <span id="round-roman">I</span></h1>
       <div class="logo-star">★</div>
     </div>
     <div class="input-card">
       <p class="input-label">Inserisci la frase segreta</p>
-      <textarea id="frase-input" placeholder="Es: BUONGIORNO A TUTTI" maxlength="80" rows="3"></textarea>
-      <button id="btn-start" onclick="startGame()">▶ INIZIA IL GIOCO</button>
+      <textarea id="frase-input" maxlength="100" rows="3" placeholder="Es: BUONGIORNO A TUTTI"></textarea>
+      <button id="btn-start">Inizia il gioco</button>
+      <button class="btn-link" id="btn-back-round">← Cambia round</button>
     </div>
-  </div>
+  </section>
 
-  <!-- SCHERMATA DI GIOCO -->
-  <div id="screen-game" class="screen">
-    <header class="game-header">
-      <div class="header-logo">
-        <span class="star-small">★</span>
-        RUOTA DELLA <strong>FORTUNA</strong>
-        <span class="star-small">★</span>
-      </div>
-    </header>
-
-    <div id="tabellone-container">
-      <div id="tabellone"></div>
-    </div>
-
-    <div id="input-area">
-      <div class="lettera-wrapper">
-        <label for="lettera-input">Inserisci una lettera:</label>
-        <div class="lettera-row">
-          <input id="lettera-input" type="text" maxlength="1" placeholder="A" autocomplete="off" />
-          <button id="btn-lettera" onclick="checkLettera()">✔ CONFERMA</button>
+  <section id="screen-game" class="screen">
+    <div class="game-layout">
+      <main class="game-main">
+        <div id="tabellone-container">
+          <div id="tabellone"></div>
         </div>
-        <div id="msg-feedback" class="feedback hidden"></div>
+
+        <div id="input-area">
+          <div class="lettera-wrapper">
+            <label id="lettera-label" for="lettera-input">Indovina una lettera:</label>
+            <div class="lettera-row">
+              <input id="lettera-input" type="text" maxlength="1" placeholder="A" autocomplete="off" disabled />
+              <button id="btn-lettera" disabled>Conferma</button>
+            </div>
+            <div id="msg-feedback" class="feedback hidden"></div>
+          </div>
+        </div>
+
+        <div class="wheel-section">
+          <div id="wheel-result" class="wheel-result hidden"></div>
+          <div class="wheel-stage">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheel-canvas" width="440" height="440"></canvas>
+            <div class="wheel-hub">
+              <img src="Midalot.png" alt="Mida" class="wheel-logo"
+                onerror="this.style.display='none'; this.parentNode.classList.add('no-logo');" />
+            </div>
+          </div>
+          <button id="btn-spin">Gira la ruota</button>
+        </div>
+
+        <div class="game-actions">
+          <button id="btn-buy-vowel">Compra vocale</button>
+          <button id="btn-use-oracle">Usa Oracolo</button>
+          <button id="btn-solve">Risolvi frase</button>
+          <button id="btn-reveal">Mostra soluzione</button>
+          <button id="btn-manual-winner">Assegna round</button>
+          <button id="btn-next-turn">Passa turno</button>
+          <button id="btn-newround-game">Nuovo round</button>
+          <button id="btn-newmatch-game">Nuova partita</button>
+        </div>
+      </main>
+
+      <aside class="scoreboard">
+        <div class="turn-banner">Tocca a <b id="turn-name">-</b></div>
+        <div id="players-list" class="players-list"></div>
+        <div class="manual-panel">
+          <p>Correzioni rapide</p>
+          <div id="manual-buttons"></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="screen-result" class="screen">
+    <div class="result-container">
+      <div class="win-stars">★ ★ ★</div>
+      <h2 class="win-title" id="result-title">ROUND FINITO</h2>
+      <div id="result-frase" class="result-frase"></div>
+      <div id="result-tables"></div>
+      <div class="result-actions">
+        <button class="btn-win" id="btn-result-next">Nuovo round</button>
+        <button class="btn-win secondary" data-home>Menu iniziale</button>
       </div>
     </div>
+  </section>
 
-    <button id="btn-next" class="hidden" onclick="newGame()">▶ NUOVA FRASE</button>
-  </div>
-
-  <!-- SCHERMATA VITTORIA -->
-  <div id="screen-win" class="screen">
-    <div class="win-container">
-      <div class="win-stars">★ ★ ★</div>
-      <h2 class="win-title">BRAVO!</h2>
-      <p class="win-subtitle">Hai indovinato la frase!</p>
-      <div id="win-frase"></div>
-      <button onclick="newGame()" class="btn-win">▶ NUOVA FRASE</button>
+  <section id="screen-flash-input" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1>ROUND FLASH</h1>
+      <div class="logo-star">★</div>
     </div>
-  </div>
+    <div class="input-card">
+      <p class="input-label">Frase dello spareggio</p>
+      <textarea id="flash-input" maxlength="100" rows="3" placeholder="Inserisci la frase"></textarea>
+      <button id="btn-flash-start">Apri tabellone</button>
+      <button class="btn-link" data-home>← Menu iniziale</button>
+    </div>
+  </section>
 
-  <script src="game.js"></script>
+  <section id="screen-flash-game" class="screen">
+    <div class="game-layout">
+      <main class="game-main">
+        <div id="flash-board" class="final-board"></div>
+        <div class="timer-panel">
+          <div id="flash-timer" class="timer-display">05</div>
+          <button id="btn-flash-timer">Start 5s</button>
+          <button id="btn-flash-reset">Reset</button>
+        </div>
+        <div id="input-area-flash">
+          <div class="lettera-wrapper">
+            <label for="flash-letter">Lettera chiamata:</label>
+            <div class="lettera-row">
+              <input id="flash-letter" type="text" maxlength="1" placeholder="A" autocomplete="off" />
+              <button id="btn-flash-letter">Conferma</button>
+            </div>
+            <div id="flash-feedback" class="feedback hidden"></div>
+          </div>
+        </div>
+        <div class="game-actions">
+          <button id="btn-flash-solve">Risposta corretta</button>
+          <button id="btn-flash-next">Passa turno</button>
+          <button data-home>Menu iniziale</button>
+        </div>
+      </main>
+      <aside class="scoreboard">
+        <div class="turn-banner">Tocca a <b id="flash-turn-name">-</b></div>
+        <div id="flash-players-list" class="players-list"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="screen-final-menu" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1>GIOCO FINALE</h1>
+      <div class="logo-star">★</div>
+    </div>
+    <div class="mode-grid">
+      <button class="mode-card final-choice" data-final="board1">
+        <span>Tabellone 1</span>
+        <small>Fino alla fine</small>
+      </button>
+      <button class="mode-card final-choice" data-final="board2">
+        <span>Tabellone 2</span>
+        <small>La tastiera rotta</small>
+      </button>
+    </div>
+    <button class="btn-link" data-home>← Menu iniziale</button>
+  </section>
+
+  <section id="screen-final-input" class="screen">
+    <div class="logo-title small">
+      <div class="logo-star">★</div>
+      <h1 id="final-input-title">TABELLONE FINALE</h1>
+      <div class="logo-star">★</div>
+    </div>
+    <div class="input-card">
+      <p class="input-label" id="final-phrase-label">Frase da indovinare</p>
+      <textarea id="final-phrase" maxlength="100" rows="3" placeholder="Inserisci frase"></textarea>
+      <p class="input-label">Soluzione per la regia</p>
+      <textarea id="final-solution" maxlength="100" rows="2" placeholder="Opzionale"></textarea>
+      <button id="btn-final-open">Apri tabellone</button>
+      <button class="btn-link" id="btn-final-back">← Scegli tabellone</button>
+    </div>
+  </section>
+
+  <section id="screen-final-game" class="screen">
+    <div class="final-layout">
+      <div id="final-board" class="final-board"></div>
+      <div id="qwerty" class="qwerty"></div>
+      <div class="timer-panel">
+        <div id="final-timer" class="timer-display">20</div>
+        <button id="btn-final-timer">Start 20s</button>
+        <button id="btn-final-reset">Reset</button>
+      </div>
+      <div class="final-actions">
+        <button id="btn-final-solution">Mostra soluzione</button>
+        <button id="btn-final-edit">Cambia frase</button>
+        <button data-home>Menu iniziale</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="src/config/wheels.js"></script>
+  <script src="src/core/state.js"></script>
+  <script src="src/core/letters.js"></script>
+  <script src="src/core/scoring.js"></script>
+  <script src="src/ui/board.js"></script>
+  <script src="src/ui/wheel.js"></script>
+  <script src="src/ui/timers.js"></script>
+  <script src="src/game.js"></script>
 </body>
 
 </html>
