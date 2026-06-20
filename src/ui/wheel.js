@@ -68,9 +68,15 @@
 
   function spin({ canvas, wheel, getRotation, setRotation, onDone }) {
     const startRot = getRotation();
+    const arc = (Math.PI * 2) / wheel.segments.length;
+    const pointer = -Math.PI / 2;
     const turns = 5 + Math.floor(Math.random() * 4);
-    const extra = Math.random() * Math.PI * 2;
-    const total = turns * Math.PI * 2 + extra;
+    const targetIdx = Math.floor(Math.random() * wheel.segments.length);
+    const centerOffset = arc * (0.5 + (Math.random() - 0.5) * 0.38);
+    const targetRel = targetIdx * arc + centerOffset;
+    const startRel = ((pointer - startRot) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    let deltaRel = (targetRel - startRel + Math.PI * 2) % (Math.PI * 2);
+    const total = turns * Math.PI * 2 - deltaRel;
     const duration = 4200;
     const start = performance.now();
     const ease = t => 1 - Math.pow(1 - t, 3);

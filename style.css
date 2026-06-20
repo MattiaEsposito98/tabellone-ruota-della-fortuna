@@ -123,7 +123,11 @@ body {
 }
 
 #frase-input,
-#solve-input {
+#solve-input,
+#flash-input,
+#flash-letter,
+#final-phrase,
+#final-solution {
   background: var(--cell-bg);
   border: 2px solid var(--yellow);
   border-radius: 8px;
@@ -140,21 +144,31 @@ body {
 }
 
 #frase-input::placeholder,
-#solve-input::placeholder {
+#solve-input::placeholder,
+#flash-input::placeholder,
+#flash-letter::placeholder,
+#final-phrase::placeholder,
+#final-solution::placeholder {
   color: rgba(255, 255, 255, .3);
   font-weight: 400;
   letter-spacing: 1px;
 }
 
 #frase-input:focus,
-#solve-input:focus {
+#solve-input:focus,
+#flash-input:focus,
+#flash-letter:focus,
+#final-phrase:focus,
+#final-solution:focus {
   border-color: var(--white);
   box-shadow: 0 0 10px rgba(255, 193, 7, .4);
 }
 
 /* Pulsanti gialli principali */
 #btn-start,
-#btn-setup {
+#btn-setup,
+#btn-flash-start,
+#btn-final-open {
   background: var(--yellow);
   color: var(--ink);
   border: none;
@@ -170,14 +184,18 @@ body {
 }
 
 #btn-start:hover,
-#btn-setup:hover {
+#btn-setup:hover,
+#btn-flash-start:hover,
+#btn-final-open:hover {
   background: #ffd54f;
   transform: translateY(-2px);
   box-shadow: 0 6px 0 var(--yellow-dark);
 }
 
 #btn-start:active,
-#btn-setup:active {
+#btn-setup:active,
+#btn-flash-start:active,
+#btn-final-open:active {
   transform: translateY(2px);
   box-shadow: 0 2px 0 var(--yellow-dark);
 }
@@ -510,12 +528,14 @@ body {
 }
 
 #lettera-input:disabled,
-#btn-lettera:disabled {
+#btn-lettera:disabled,
+#btn-flash-letter:disabled {
   opacity: .4;
   cursor: not-allowed;
 }
 
-#btn-lettera {
+#btn-lettera,
+#btn-flash-letter {
   flex: 1;
   background: var(--yellow);
   color: var(--ink);
@@ -530,7 +550,8 @@ body {
   box-shadow: 0 4px 0 var(--yellow-dark);
 }
 
-#btn-lettera:hover:not(:disabled) {
+#btn-lettera:hover:not(:disabled),
+#btn-flash-letter:hover:not(:disabled) {
   background: #ffd54f;
   transform: translateY(-2px);
   box-shadow: 0 6px 0 var(--yellow-dark);
@@ -1437,6 +1458,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding: 18px 0 34px;
 }
 
 .timer-panel {
@@ -1445,6 +1467,12 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
+  width: 100%;
+  max-width: 620px;
+  padding: 16px;
+  background: var(--bg2);
+  border: 2px solid rgba(255, 193, 7, .35);
+  border-radius: 14px;
 }
 
 .timer-display {
@@ -1492,6 +1520,11 @@ body {
   gap: 8px;
   align-items: center;
   width: 100%;
+  max-width: 620px;
+  padding: 16px;
+  background: rgba(22, 33, 62, .86);
+  border: 2px solid rgba(255, 193, 7, .28);
+  border-radius: 14px;
 }
 
 .qwerty-row {
@@ -1527,6 +1560,8 @@ body {
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
+  max-width: 760px;
 }
 
 .wheel-result.res-special {
