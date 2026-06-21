@@ -1388,6 +1388,27 @@ body {
   gap: 12px;
 }
 
+.screen-actions {
+  width: 100%;
+  max-width: 840px;
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.screen-actions .btn-link {
+  border: 2px solid rgba(255, 193, 7, .45);
+  border-radius: 8px;
+  padding: 10px 18px;
+  color: var(--yellow);
+  background: rgba(22, 33, 62, .62);
+}
+
+.screen-actions .btn-link:hover {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
 .choice-btn {
   min-height: 72px;
   text-align: center;

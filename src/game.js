@@ -177,6 +177,7 @@
     $('lettera-label').textContent = label || (canSpin ? 'Gira la ruota o usa una azione:' : 'Indovina una lettera:');
     $('btn-buy-vowel').disabled = !canSpin;
     $('btn-use-oracle').disabled = !canSpin || state.round.oracleTokens[state.round.current] <= 0;
+    $('btn-solve').disabled = !canSpin;
     if (!canSpin) setTimeout(() => input.focus(), 60);
   }
 
@@ -779,6 +780,7 @@
     $('frase-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('btn-buy-vowel').addEventListener('click', buyVowelAction);
     $('btn-use-oracle').addEventListener('click', () => startOracleAttack(true));
+    $('btn-solve').addEventListener('click', () => openSolve('round'));
     $('btn-solve-cancel').addEventListener('click', () => closeModal('modal-solve'));
     $('btn-solve-confirm').addEventListener('click', confirmSolve);
     $('solve-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confirmSolve(); } });
