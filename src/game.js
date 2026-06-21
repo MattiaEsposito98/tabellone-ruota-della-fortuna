@@ -290,7 +290,13 @@
       return;
     }
 
-    modal('ORACOLO', 'Attacco o conserva?<br><br><b>Conserva</b>: tieni lo scudo per proteggerti da FREEZE o AL VERDE.<br><b>Attacco</b>: controlli una consonante e poi dichiari la lettera definitiva da 500 punti.', [
+    state.round.pending = { kind: 'oracleEarn', value: 500 };
+    showWheelResult('ORACOLO: indovina una consonante da 500 per ottenere il potere.', 'res-special');
+    setTurnState('letter', 'Dichiara una consonante da 500:');
+  }
+
+  function chooseOracleAfterHit() {
+    modal('ORACOLO OTTENUTO', 'Hai indovinato la consonante. Attacco o conserva?<br><br><b>Conserva</b>: tieni lo scudo per proteggerti da FREEZE o AL VERDE.<br><b>Attacco</b>: controlli una consonante e poi dichiari la lettera definitiva da 500 punti.', [
       {
         label: 'Attacco',
         onClick: () => startOracleAttack(false)
@@ -299,11 +305,11 @@
         label: 'Conserva',
         secondary: true,
         onClick: () => {
-          state.round.oracleTokens[state.round.current] += 1;
-          state.round.pending = { kind: 'score', value: 500 };
+          state.round.oracleTokens[state.round.current] = 1;
+          state.round.pending = null;
           renderScoreboard();
-          showWheelResult('Gettone Oracolo conservato. Ora chiama una consonante da 500.', 'res-special');
-          setTurnState('letter', 'Dichiara una consonante da 500:');
+          showWheelResult('Scudo Oracolo conservato.', 'res-special');
+          setTurnState('spin');
         }
       }
     ]);
@@ -364,7 +370,39 @@
       return;
     }
 
+    if (pending.kind === 'oracleEarn') {
+      handleOracleEarnLetter(letter);
+      return;
+    }
+
     resolveScoredConsonant(letter, pending.value);
+  }
+
+  function handleOracleEarnLetter(letter) {
+    if (!letters.isConsonant(letter)) {
+      feedback('msg-feedback', 'Con Oracolo serve una consonante.', 'no');
+      return;
+    }
+
+    state.round.called.add(letter);
+    const count = letters.countInPhrase(state.round.phraseNorm, letter);
+    if (count > 0) {
+      const gain = 500 * count;
+      state.round.revealed.add(letter);
+      state.round.points[state.round.current] += gain;
+      board.revealLetter(letter);
+      feedback('msg-feedback', `${letter}: ${count} x 500 = +${gain}. Oracolo ottenuto.`, 'ok');
+      renderScoreboard();
+      if (board.isComplete(state.round.phraseNorm, state.round.revealed)) {
+        setTimeout(() => endRound(state.round.current, 'completed'), 700);
+        return;
+      }
+      setTimeout(chooseOracleAfterHit, 450);
+      return;
+    }
+
+    feedback('msg-feedback', `${letter} assente: Oracolo non ottenuto e passa il turno.`, 'no');
+    nextTurn();
   }
 
   function handleOracleLetter(letter) {
@@ -553,20 +591,29 @@
   function buildResultTable(winnerName) {
     const cont = $('result-tables');
     const totals = scoring.totalsForPlayers(state.match);
+    const maxTotal = Math.max(...totals);
+    const leaders = state.match.players
+      .map((player, idx) => ({ name: player.name, total: totals[idx] }))
+      .filter(player => player.total === maxTotal && maxTotal > 0);
+    const leaderText = leaders.length
+      ? leaders.map(player => player.name).join(', ') + ` (${maxTotal})`
+      : 'Nessun punteggio';
     let head = '<th>Partecipante</th>';
     state.match.history.forEach((item, idx) => { head += `<th>R${idx + 1}<br><small>${item.wheel}</small></th>`; });
     head += '<th>Totale</th>';
 
     let rows = '';
     state.match.players.forEach((player, idx) => {
+      const isLeader = totals[idx] === maxTotal && maxTotal > 0;
       let cells = `<td class="pname">${player.name}</td>`;
       state.match.history.forEach(item => { cells += `<td>${item.points[idx] || 0}</td>`; });
-      cells += `<td class="ptot">${totals[idx]}</td>`;
-      rows += `<tr>${cells}</tr>`;
+      cells += `<td class="ptot${isLeader ? ' winner' : ''}">${totals[idx]}${isLeader ? ' ★' : ''}</td>`;
+      rows += `<tr class="${isLeader ? 'leader-row' : ''}">${cells}</tr>`;
     });
 
     cont.innerHTML = `
       <h3 class="result-sub">Vincitore round: ${winnerName}</h3>
+      <div class="leader-banner">Miglior punteggio: <b>${leaderText}</b></div>
       <div class="table-scroll">
         <table class="score-table"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>
       </div>`;
@@ -707,8 +754,16 @@
   }
 
   function revealFlashSolution() {
-    board.revealAll(state.flash.revealed);
-    modal('Soluzione Round Flash', `<b>${state.flash.phrase}</b>`);
+    modal('Mostra soluzione?', 'Vuoi rivelare la soluzione del Round Flash?', [
+      {
+        label: 'Mostra',
+        onClick: () => {
+          board.revealAll(state.flash.revealed);
+          modal('Soluzione Round Flash', `<b>${state.flash.phrase}</b>`);
+        }
+      },
+      { label: 'Annulla', secondary: true }
+    ]);
   }
 
   function chooseFinal(type) {
@@ -761,7 +816,13 @@
 
   function showFinalSolution() {
     const solution = state.finale.solution || state.finale.phrase;
-    modal('Soluzione', `<b>${solution}</b>`);
+    modal('Mostra soluzione?', 'Vuoi mostrare la soluzione del gioco finale?', [
+      {
+        label: 'Mostra',
+        onClick: () => modal('Soluzione', `<b>${solution}</b>`)
+      },
+      { label: 'Annulla', secondary: true }
+    ]);
   }
 
   function bindEvents() {
@@ -798,6 +859,7 @@
     $('btn-flash-letter').addEventListener('click', checkFlashLetter);
     $('btn-flash-timer').addEventListener('click', () => timers.start(cfg.TIMERS.flash, $('flash-timer'), () => modal('Tempo scaduto', 'Passa il turno.', [{ label: 'OK', onClick: flashNextTurn }])));
     $('btn-flash-reset').addEventListener('click', () => timers.reset(cfg.TIMERS.flash, $('flash-timer')));
+    $('btn-flash-give-solution').addEventListener('click', () => openSolve('flash'));
     $('btn-flash-solve').addEventListener('click', revealFlashSolution);
     $('btn-flash-next').addEventListener('click', flashNextTurn);
 

@@ -1120,6 +1120,24 @@ body {
   text-align: center;
 }
 
+.leader-banner {
+  margin: 0 auto 12px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 18px;
+  border: 2px solid var(--yellow);
+  border-radius: 999px;
+  background: rgba(255, 193, 7, .12);
+  color: #fff;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+.leader-banner b {
+  color: var(--yellow);
+}
+
 .table-scroll {
   width: 100%;
   overflow-x: auto;
@@ -1172,6 +1190,15 @@ body {
 .score-table td.ptot.winner {
   color: var(--yellow);
   background: rgba(255, 193, 7, .12);
+}
+
+.score-table tr.leader-row td {
+  background: rgba(255, 193, 7, .1);
+}
+
+.score-table tr.leader-row td.pname {
+  color: #ffd54f;
+  text-shadow: 0 0 10px rgba(255, 193, 7, .28);
 }
 
 .result-actions {
