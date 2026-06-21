@@ -974,6 +974,13 @@ body {
   transition: background .2s, transform .1s;
 }
 
+#info-actions .modal-close,
+#info-actions .modal-cancel {
+  font-size: .9rem;
+  padding: 12px 14px;
+  letter-spacing: .8px;
+}
+
 .modal-close:hover {
   background: #ffd54f;
   transform: translateY(-2px);
@@ -982,11 +989,15 @@ body {
 .modal-btn-row {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .modal-btn-row .modal-close,
 .modal-btn-row .modal-cancel {
-  flex: 1;
+  flex: 1 1 150px;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .modal-cancel {
