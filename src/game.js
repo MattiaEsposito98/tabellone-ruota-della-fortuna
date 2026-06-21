@@ -358,8 +358,19 @@
       return;
     }
 
-    if (letters.isVowel(letter) || pending.kind === 'buyVowel') {
+    if (pending.kind === 'buyVowel') {
       handleVowel(letter);
+      return;
+    }
+
+    if (letters.isVowel(letter)) {
+      if (pending.kind === 'score') {
+        handleVowel(letter);
+      } else {
+        feedback('msg-feedback', 'Qui serve una consonante: le vocali non sono valide.', 'no');
+        $('lettera-input').value = '';
+        $('lettera-input').focus();
+      }
       return;
     }
 
