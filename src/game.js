@@ -177,7 +177,6 @@
     $('lettera-label').textContent = label || (canSpin ? 'Gira la ruota o usa una azione:' : 'Indovina una lettera:');
     $('btn-buy-vowel').disabled = !canSpin;
     $('btn-use-oracle').disabled = !canSpin || state.round.oracleTokens[state.round.current] <= 0;
-    $('btn-solve').disabled = !canSpin;
     if (!canSpin) setTimeout(() => input.focus(), 60);
   }
 
@@ -283,7 +282,14 @@
   }
 
   function handleOracleSegment() {
-    modal('ORACOLO', 'Valore del turno: <b>500 punti per consonante</b>.<br>Scegli se usarlo subito in Attacco oppure conservarlo.', [
+    if (state.round.oracleTokens[state.round.current] > 0) {
+      state.round.pending = { kind: 'score', value: 500 };
+      showWheelResult('ORACOLO già conservato: lo spicchio vale 500 punti per consonante.', 'res-special');
+      setTurnState('letter', 'Dichiara una consonante da 500:');
+      return;
+    }
+
+    modal('ORACOLO', 'Attacco o conserva?<br><br><b>Conserva</b>: tieni lo scudo per proteggerti da FREEZE o AL VERDE.<br><b>Attacco</b>: controlli una consonante e poi dichiari la lettera definitiva da 500 punti.', [
       {
         label: 'Attacco',
         onClick: () => startOracleAttack(false)
@@ -369,21 +375,13 @@
 
     if (pending.phase === 'ask') {
       pending.askedLetter = letter;
-      modal('Risposta regia', `La consonante richiesta è <b>${letter}</b>. Cosa risponde la regia?`, [
+      const count = letters.countInPhrase(state.round.phraseNorm, letter);
+      modal('Risposta Oracolo', `La consonante <b>${letter}</b> compare <b>${count}</b> volta/e sul tabellone.<br><br>Ora il concorrente può dichiarare questa consonante o un’altra.`, [
         {
-          label: 'Sì, presente',
+          label: 'Dichiara lettera',
           onClick: () => {
             pending.phase = 'call';
-            feedback('msg-feedback', 'Regia: Sì. Ora dichiara la consonante definitiva.', 'ok');
-            setTurnState('letter', 'Consonante definitiva da chiamare:');
-          }
-        },
-        {
-          label: 'No, assente',
-          secondary: true,
-          onClick: () => {
-            pending.phase = 'call';
-            feedback('msg-feedback', 'Regia: No. Puoi dichiarare un’altra consonante.', 'no');
+            feedback('msg-feedback', `Oracolo: ${letter} compare ${count} volta/e. Ora dichiara la consonante definitiva.`, count > 0 ? 'ok' : 'no');
             setTurnState('letter', 'Consonante definitiva da chiamare:');
           }
         }
@@ -707,6 +705,11 @@
     }
   }
 
+  function revealFlashSolution() {
+    board.revealAll(state.flash.revealed);
+    modal('Soluzione Round Flash', `<b>${state.flash.phrase}</b>`);
+  }
+
   function chooseFinal(type) {
     state.resetFinale();
     state.finale.type = type;
@@ -742,12 +745,13 @@
       rowEl.className = 'qwerty-row';
       row.split('').forEach(ch => {
         const btn = document.createElement('button');
-        btn.textContent = ch;
-        btn.disabled = !clickable;
-        btn.addEventListener('click', () => {
-          state.finale.revealed.add(ch);
-          board.revealLetter(ch);
-        });
+      btn.textContent = ch;
+      btn.disabled = !clickable;
+      btn.addEventListener('click', () => {
+        state.finale.revealed.add(ch);
+        btn.classList.add('used');
+        board.revealLetter(ch);
+      });
         rowEl.appendChild(btn);
       });
       wrap.appendChild(rowEl);
@@ -775,7 +779,6 @@
     $('frase-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('btn-buy-vowel').addEventListener('click', buyVowelAction);
     $('btn-use-oracle').addEventListener('click', () => startOracleAttack(true));
-    $('btn-solve').addEventListener('click', () => openSolve('round'));
     $('btn-solve-cancel').addEventListener('click', () => closeModal('modal-solve'));
     $('btn-solve-confirm').addEventListener('click', confirmSolve);
     $('solve-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confirmSolve(); } });
@@ -793,7 +796,7 @@
     $('btn-flash-letter').addEventListener('click', checkFlashLetter);
     $('btn-flash-timer').addEventListener('click', () => timers.start(cfg.TIMERS.flash, $('flash-timer'), () => modal('Tempo scaduto', 'Passa il turno.', [{ label: 'OK', onClick: flashNextTurn }])));
     $('btn-flash-reset').addEventListener('click', () => timers.reset(cfg.TIMERS.flash, $('flash-timer')));
-    $('btn-flash-solve').addEventListener('click', () => openSolve('flash'));
+    $('btn-flash-solve').addEventListener('click', revealFlashSolution);
     $('btn-flash-next').addEventListener('click', flashNextTurn);
 
     document.querySelectorAll('.final-choice').forEach(btn => btn.addEventListener('click', () => chooseFinal(btn.dataset.final)));

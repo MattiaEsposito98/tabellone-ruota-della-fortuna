@@ -1,14 +1,15 @@
 (function () {
   const COLORS = {
-    gold: { bg: '#f0a500', tx: '#1a1a1a' },
+    gold: { bg: '#f0a12a', tx: '#1a1a1a' },
     tan: { bg: '#d6c78a', tx: '#1a1a1a' },
     navy: { bg: '#2e3b66', tx: '#ffffff' },
     steel: { bg: '#9aa7bd', tx: '#1a1a1a' },
     olive: { bg: '#6b6248', tx: '#ffffff' },
-    cream: { bg: '#e8e2cf', tx: '#1a1a1a' },
+    cream: { bg: '#d8cf77', tx: '#1a1a1a' },
     black: { bg: '#151515', tx: '#ffffff' },
     white: { bg: '#f5f5f5', tx: '#1a1a1a' },
-    orange: { bg: '#e0641e', tx: '#ffffff' },
+    orange: { bg: '#e0641e', tx: '#1a1a1a' },
+    red: { bg: '#d85032', tx: '#1a1a1a' },
     green: { bg: '#1d7438', tx: '#ffffff' },
     brown: { bg: '#5a5036', tx: '#ffffff' }
   };
@@ -25,6 +26,11 @@
   }
 
   function segment(item) {
+    if (typeof item === 'object' && item.item !== undefined) {
+      const base = segment(item.item);
+      base.col = item.col || base.col;
+      return base;
+    }
     if (typeof item === 'number') return point(item);
     if (item === 'FREEZE') return special('FREEZE', 'freeze', 'white');
     if (item === 'AL VERDE') return special('AL VERDE', 'alVerde', 'green');
@@ -34,6 +40,10 @@
     if (item === 'ROBIN') return special('ROBIN', 'robin', 'orange');
     if (item === 'DIMEZZA') return special('DIMEZZA', 'dimezza', 'orange');
     return special(String(item), 'manual', 'white');
+  }
+
+  function c(item, col) {
+    return { item, col };
   }
 
   function wheel(id, roman, name, rawSegments) {
@@ -47,24 +57,36 @@
 
   const WHEELS = [
     wheel('round1', 'I', 'Round I', [
-      'AL VERDE', 300, 100, 700, 400, 500, 'FREEZE', 500,
-      200, 400, 300, 500, 'AL VERDE', 100, 800, 200,
-      500, 300, 'FREEZE', 400, 100, 300, 500, 200
+      c('AL VERDE', 'green'), c(300, 'cream'), c(100, 'gold'), c(700, 'steel'),
+      c(400, 'navy'), c(500, 'brown'), c('FREEZE', 'white'), c(500, 'cream'),
+      c(200, 'gold'), c(400, 'steel'), c(300, 'navy'), c(500, 'brown'),
+      c('AL VERDE', 'green'), c(100, 'cream'), c(800, 'gold'), c(200, 'steel'),
+      c(500, 'brown'), c(300, 'navy'), c('FREEZE', 'white'), c(400, 'cream'),
+      c(100, 'gold'), c(300, 'red'), c(500, 'steel'), c(200, 'navy')
     ]),
     wheel('round2', 'II', 'Round II', [
-      'FREEZE', 400, 100, 'ORACOLO', 500, 200, 'AL VERDE', 300,
-      100, 700, 400, 'MIDA', 'FREEZE', 500, 200, 'ORACOLO',
-      300, 'MIDA', 'AL VERDE', 100, 800, 200, 'MIDA', 300
+      c('FREEZE', 'white'), c(400, 'cream'), c(100, 'gold'), c('ORACOLO', 'red'),
+      c(500, 'steel'), c(200, 'navy'), c('AL VERDE', 'green'), c(300, 'cream'),
+      c(100, 'gold'), c(700, 'steel'), c(400, 'navy'), c('MIDA', 'brown'),
+      c('FREEZE', 'white'), c(500, 'cream'), c(200, 'gold'), c('ORACOLO', 'red'),
+      c(300, 'navy'), c('MIDA', 'brown'), c('AL VERDE', 'green'), c(100, 'cream'),
+      c(800, 'gold'), c(200, 'steel'), c('MIDA', 'brown'), c(300, 'navy')
     ]),
     wheel('round3', 'III', 'Round III', [
-      'ROBIN', 500, 200, 'AL VERDE', 300, 100, 700, 400,
-      'MIDA', 'FREEZE', 500, 200, 'ROBIN', 300, 'MIDA', 'AL VERDE',
-      100, 800, 200, 'MIDA', 300, 'FREEZE', 400, 100
+      c('ROBIN', 'red'), c(500, 'steel'), c(200, 'navy'), c('AL VERDE', 'green'),
+      c(300, 'cream'), c(100, 'gold'), c(700, 'steel'), c(400, 'navy'),
+      c('MIDA', 'brown'), c('FREEZE', 'white'), c(500, 'cream'), c(200, 'gold'),
+      c('ROBIN', 'red'), c(300, 'navy'), c('MIDA', 'brown'), c('AL VERDE', 'green'),
+      c(100, 'cream'), c(800, 'gold'), c(200, 'steel'), c('MIDA', 'brown'),
+      c(300, 'navy'), c('FREEZE', 'white'), c(400, 'cream'), c(100, 'gold')
     ]),
     wheel('round4', 'IV', 'Round IV', [
-      1000, 400, 'AL VERDE', 600, 200, 1400, 800, 'MIDA X2',
-      'FREEZE', 1000, 400, 'DIMEZZA', 600, 'MIDA X2', 'AL VERDE', 200,
-      1600, 400, 'MIDA X2', 600, 'FREEZE', 800, 200, 'DIMEZZA'
+      c(1000, 'steel'), c(400, 'navy'), c('AL VERDE', 'green'), c(600, 'cream'),
+      c(200, 'gold'), c(1400, 'steel'), c(800, 'navy'), c('MIDA X2', 'brown'),
+      c('FREEZE', 'white'), c(1000, 'cream'), c(400, 'gold'), c('DIMEZZA', 'red'),
+      c(600, 'navy'), c('MIDA X2', 'brown'), c('AL VERDE', 'green'), c(200, 'cream'),
+      c(1600, 'gold'), c(400, 'steel'), c('MIDA X2', 'brown'), c(600, 'navy'),
+      c('FREEZE', 'white'), c(800, 'cream'), c(200, 'gold'), c('DIMEZZA', 'red')
     ])
   ];
 
