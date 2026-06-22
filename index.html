@@ -17,18 +17,6 @@
     </div>
   </div>
 
-  <div id="modal-solve" class="modal-overlay hidden">
-    <div class="modal-box">
-      <h3 class="modal-title">Risolvi la frase</h3>
-      <p class="modal-text">Soluzione detta da <b id="solve-name"></b>.</p>
-      <textarea id="solve-input" rows="2" placeholder="Scrivi la risposta"></textarea>
-      <div class="modal-btn-row">
-        <button class="modal-cancel" id="btn-solve-cancel">Annulla</button>
-        <button class="modal-close" id="btn-solve-confirm">Verifica</button>
-      </div>
-    </div>
-  </div>
-
   <section id="screen-home" class="screen active">
     <div class="logo-title">
       <div class="logo-star">★</div>
@@ -101,6 +89,8 @@
     <div class="input-card">
       <p class="input-label">Inserisci la frase segreta</p>
       <textarea id="frase-input" maxlength="100" rows="3" placeholder="Es: BUONGIORNO A TUTTI"></textarea>
+      <p class="input-label">Tema</p>
+      <input id="tema-input" maxlength="40" type="text" placeholder="Es: Proverbi, Cinema, Musica" />
       <button id="btn-start">Inizia il gioco</button>
       <button class="btn-link" id="btn-back-round">← Cambia round</button>
     </div>
@@ -109,39 +99,45 @@
   <section id="screen-game" class="screen">
     <div class="game-layout">
       <main class="game-main">
-        <div id="tabellone-container">
-          <div id="tabellone"></div>
+        <div class="board-strip">
+          <div class="action-rail" aria-label="Azioni principali">
+            <button id="btn-spin" class="round-action" title="Gira la ruota" aria-label="Gira la ruota">Gira ruota</button>
+            <button id="btn-buy-vowel" class="round-action" title="Compra vocale" aria-label="Compra vocale">Compra vocale</button>
+            <button id="btn-reveal" class="round-action" title="Mostra soluzione" aria-label="Mostra soluzione">Mostra soluzione</button>
+          </div>
+          <div id="tabellone-container">
+            <div id="tabellone"></div>
+          </div>
+          <div id="round-theme" class="round-theme hidden"></div>
         </div>
 
-        <div id="input-area">
-          <div class="lettera-wrapper">
-            <label id="lettera-label" for="lettera-input">Indovina una lettera:</label>
-            <div class="lettera-row">
-              <input id="lettera-input" type="text" maxlength="1" autocomplete="off" disabled />
-              <button id="btn-lettera" disabled>Conferma</button>
+        <div class="play-row">
+          <div id="input-area">
+            <div class="lettera-wrapper">
+              <label id="lettera-label" for="lettera-input">Indovina una lettera:</label>
+              <div class="lettera-row">
+                <input id="lettera-input" type="text" maxlength="1" autocomplete="off" disabled />
+                <button id="btn-lettera" disabled>Conferma</button>
+              </div>
+              <div id="msg-feedback" class="feedback hidden"></div>
             </div>
-            <div id="msg-feedback" class="feedback hidden"></div>
           </div>
-        </div>
 
-        <div class="wheel-section">
-          <div id="wheel-result" class="wheel-result hidden"></div>
-          <div class="wheel-stage">
-            <div class="wheel-pointer"></div>
-            <canvas id="wheel-canvas" width="440" height="440"></canvas>
-            <div class="wheel-hub">
-              <img src="Midalot.png" alt="Mida" class="wheel-logo"
-                onerror="this.style.display='none'; this.parentNode.classList.add('no-logo');" />
+          <div class="wheel-section">
+            <div id="wheel-result" class="wheel-result hidden"></div>
+            <div class="wheel-stage">
+              <div class="wheel-pointer"></div>
+              <canvas id="wheel-canvas" width="440" height="440"></canvas>
+              <div class="wheel-hub">
+                <img src="Midalot.png" alt="Mida" class="wheel-logo"
+                  onerror="this.style.display='none'; this.parentNode.classList.add('no-logo');" />
+              </div>
             </div>
           </div>
-          <button id="btn-spin">Gira la ruota</button>
         </div>
 
         <div class="game-actions">
-          <button id="btn-buy-vowel">Compra vocale</button>
           <button id="btn-use-oracle">Usa Oracolo</button>
-          <button id="btn-solve">Dai la soluzione</button>
-          <button id="btn-reveal">Mostra soluzione</button>
           <button id="btn-manual-winner">Assegna round</button>
           <button id="btn-next-turn">Passa turno</button>
           <button id="btn-newround-game">Nuovo round</button>
@@ -207,7 +203,6 @@
           </div>
         </div>
         <div class="game-actions">
-          <button id="btn-flash-give-solution">Dai la soluzione</button>
           <button id="btn-flash-solve">Mostra soluzione</button>
           <button id="btn-flash-next">Passa turno</button>
           <button data-home>Menu iniziale</button>
@@ -250,8 +245,6 @@
     <div class="input-card">
       <p class="input-label" id="final-phrase-label">Frase da indovinare</p>
       <textarea id="final-phrase" maxlength="100" rows="3" placeholder="Inserisci frase"></textarea>
-      <p class="input-label">Soluzione per la regia</p>
-      <textarea id="final-solution" maxlength="100" rows="2" placeholder="Opzionale"></textarea>
       <button id="btn-final-open">Apri tabellone</button>
       <button class="btn-link" id="btn-final-back">← Scegli tabellone</button>
     </div>
@@ -267,7 +260,6 @@
         <button id="btn-final-reset">Reset</button>
       </div>
       <div class="final-actions">
-        <button id="btn-final-solution">Mostra soluzione</button>
         <button id="btn-final-edit">Cambia frase</button>
         <button data-home>Menu iniziale</button>
       </div>

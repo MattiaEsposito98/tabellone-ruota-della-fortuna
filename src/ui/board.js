@@ -1,8 +1,7 @@
 (function () {
-  function splitPhrase(phrase, phraseNorm) {
+  function splitPhrase(phrase, phraseNorm, max) {
     const words = String(phrase || '').split(' ');
     const normWords = String(phraseNorm || '').split(' ');
-    const max = 14;
     const rows = [];
     let current = [];
     let len = 0;
@@ -31,10 +30,13 @@
 
   function renderBoard(container, phrase, phraseNorm, revealed, options) {
     const opts = options || {};
+    const availableWidth = container.clientWidth || 900;
+    const maxLettersPerRow = Math.max(14, Math.min(24, Math.floor(availableWidth / 58)));
+
     container.innerHTML = '';
     container.classList.toggle('board-open', !!opts.open);
 
-    splitPhrase(phrase, phraseNorm).forEach(row => {
+    splitPhrase(phrase, phraseNorm, maxLettersPerRow).forEach(row => {
       const line = document.createElement('div');
       line.className = 'linea-row';
       row.forEach(({ word, norm }) => {

@@ -72,6 +72,16 @@
       c(300, 'navy'), c('MIDA', 'brown'), c('AL VERDE', 'green'), c(100, 'cream'),
       c(800, 'gold'), c(200, 'steel'), c('MIDA', 'brown'), c(300, 'navy')
     ]),
+    // wheel('round2', 'II', 'Round II', [
+    //   c('ORACOLO', 'red'), c('ORACOLO', 'red'), c('ORACOLO', 'red'), c('ORACOLO', 'red'),
+    //   c('ORACOLO', 'red'), c('ORACOLO', 'red'), c('ORACOLO', 'red'), c('ORACOLO', 'red'),
+    //   c('AL VERDE', 'green'), c('AL VERDE', 'green'), c('AL VERDE', 'green'), c('AL VERDE', 'green'),
+    //   c('FREEZE', 'white'), c('AL VERDE', 'green'), c(200, 'gold'), c('ORACOLO', 'red'),
+    //   c(300, 'navy'), c('MIDA', 'brown'), c('AL VERDE', 'green'), c(100, 'cream'),
+    //   c(800, 'gold'), c(200, 'steel'), c('MIDA', 'brown'), c(300, 'navy')
+    // ]),
+
+    //Da produzione
     wheel('round3', 'III', 'Round III', [
       c('ROBIN', 'red'), c(500, 'steel'), c(200, 'navy'), c('AL VERDE', 'green'),
       c(300, 'cream'), c(100, 'gold'), c(700, 'steel'), c(400, 'navy'),
@@ -80,6 +90,16 @@
       c(100, 'cream'), c(800, 'gold'), c(200, 'steel'), c('MIDA', 'brown'),
       c(300, 'navy'), c('FREEZE', 'white'), c(400, 'cream'), c(100, 'gold')
     ]),
+
+    //Per testare
+    // wheel('round3', 'III', 'Round III', [
+    //   c('ROBIN', 'red'), c('ROBIN', 'red'), c('ROBIN', 'red'), c('ROBIN', 'red'),
+    //   c('ROBIN', 'red'), c('ROBIN', 'red'), c('ROBIN', 'red'), c('ROBIN', 'red'),
+    //   c('AL VERDE', 'green'), c('AL VERDE', 'green'), c('FREEZE', 'white'), c('FREEZE', 'white'),
+    //   c('ROBIN', 'red'), c('ROBIN', 'red'), c(200, 'gold'), c(300, 'navy'),
+    //   c('MIDA', 'brown'), c('AL VERDE', 'green'), c(100, 'cream'), c(800, 'gold'),
+    //   c('ROBIN', 'red'), c('ROBIN', 'red'), c(400, 'cream'), c(100, 'gold')
+    // ]),
     wheel('round4', 'IV', 'Round IV', [
       c(1000, 'steel'), c(400, 'navy'), c('AL VERDE', 'green'), c(600, 'cream'),
       c(200, 'gold'), c(1400, 'steel'), c(800, 'navy'), c('MIDA X2', 'brown'),

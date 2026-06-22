@@ -9,8 +9,6 @@
   const timers = window.GiroTimers;
 
   let setupCount = 3;
-  let solveContext = 'round';
-
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
     $(id).classList.add('active');
@@ -61,7 +59,7 @@
   }
 
   function nextIndex(idx) {
-    return (idx - 1 + state.match.players.length) % state.match.players.length;
+    return (idx + 1) % state.match.players.length;
   }
 
   function selectCount(n) {
@@ -133,6 +131,7 @@
     state.round.wheelIdx = idx;
     $('round-roman').textContent = cfg.WHEELS[idx].roman;
     $('frase-input').value = '';
+    $('tema-input').value = '';
     showScreen('screen-input');
     setTimeout(() => $('frase-input').focus(), 80);
   }
@@ -151,11 +150,16 @@
     state.round.current = current;
     state.round.phrase = phrase.toUpperCase();
     state.round.phraseNorm = letters.normalizeText(phrase);
+    state.round.theme = $('tema-input').value.trim().toUpperCase();
     state.round.points = state.match.players.map(() => 0);
     state.round.oracleTokens = state.match.players.map(() => 0);
+    state.round.oracleModes = state.match.players.map(() => null);
+    state.round.oracleAttackLocked = state.match.players.map(() => false);
     state.round.rotation = -Math.PI / 2;
 
+    $('tabellone').classList.remove('solution-complete');
     board.renderBoard($('tabellone'), state.round.phrase, state.round.phraseNorm, state.round.revealed);
+    updateRoundTheme();
     wheelUi.resizeCanvas($('wheel-canvas'));
     wheelUi.draw($('wheel-canvas'), currentWheel(), state.round.rotation);
     renderScoreboard();
@@ -176,9 +180,22 @@
     input.value = '';
     $('lettera-label').textContent = label || (canSpin ? 'Gira la ruota o usa una azione:' : 'Indovina una lettera:');
     $('btn-buy-vowel').disabled = !canSpin;
-    $('btn-use-oracle').disabled = !canSpin || state.round.oracleTokens[state.round.current] <= 0;
-    $('btn-solve').disabled = !canSpin;
+    $('btn-use-oracle').disabled = state.round.spinning;
+    $('btn-reveal').disabled = !canSpin;
+    updateRoundTheme();
     if (!canSpin) setTimeout(() => input.focus(), 60);
+  }
+
+  function updateRoundTheme() {
+    const el = $('round-theme');
+    if (!el) return;
+    if (state.round.theme) {
+      el.textContent = `Tema: ${state.round.theme}`;
+      el.classList.remove('hidden');
+    } else {
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
   }
 
   function nextTurn() {
@@ -190,9 +207,14 @@
 
   function spinWheel() {
     if (state.round.spinning || state.round.pending) return;
+    if (state.round.oracleAttackLocked[state.round.current]) {
+      state.round.oracleAttackLocked[state.round.current] = false;
+      renderScoreboard();
+    }
     state.round.spinning = true;
     hideWheelResult();
     $('btn-spin').disabled = true;
+    $('btn-use-oracle').disabled = true;
     $('btn-spin').classList.add('spinning');
     wheelUi.spin({
       canvas: $('wheel-canvas'),
@@ -258,12 +280,15 @@
 
   function handleNegativeSegment(title, text, applyEffect) {
     const tokens = state.round.oracleTokens[state.round.current];
-    if (tokens > 0) {
+    const mode = state.round.oracleModes[state.round.current];
+    if (tokens > 0 && mode === 'defense') {
       modal(title, `${text}<br><br><b>${currentPlayerName()}</b> ha uno Scudo Oracolo. Vuole usarlo?`, [
         {
           label: 'Usa scudo',
           onClick: () => {
-            state.round.oracleTokens[state.round.current] -= 1;
+            state.round.oracleTokens[state.round.current] = Math.max(0, (state.round.oracleTokens[state.round.current] || 0) - 1);
+            state.round.oracleModes[state.round.current] = null;
+            state.round.oracleAttackLocked[state.round.current] = false;
             renderScoreboard();
             showWheelResult(`${title} annullato con Scudo Oracolo`, 'res-special');
             setTurnState('spin');
@@ -295,17 +320,43 @@
     setTurnState('letter', 'Dichiara una consonante da 500:');
   }
 
+  function chooseOracleAfterHitLegacy() {
+    state.round.oracleTokens[state.round.current] = 1;
+    state.round.oracleAttackLocked[state.round.current] = true;
+    state.round.pending = null;
+    renderScoreboard();
+    modal('ORACOLO OTTENUTO', 'Scudo Oracolo conservato.<br><br>Puoi usarlo subito per proteggerti da FREEZE o AL VERDE. Lâ€™attacco sarÃ  disponibile dopo il tuo prossimo giro di ruota.', [
+      {
+        label: 'OK',
+        onClick: () => {
+          showWheelResult('Scudo Oracolo conservato. Attacco disponibile dopo il prossimo giro ruota.', 'res-special');
+          setTurnState('spin');
+        }
+      }
+    ]);
+  }
+
   function chooseOracleAfterHit() {
-    modal('ORACOLO OTTENUTO', 'Hai indovinato la consonante. Attacco o conserva?<br><br><b>Conserva</b>: tieni lo scudo per proteggerti da FREEZE o AL VERDE.<br><b>Attacco</b>: controlli una consonante e poi dichiari la lettera definitiva da 500 punti.', [
+    modal('ORACOLO OTTENUTO', 'Hai indovinato la consonante. Scegli come usare Oracolo.<br><br><b>Attacco</b>: lo potrai usare dopo il prossimo giro di ruota per fare una domanda alla regia.<br><b>Scudo</b>: resta come protezione da FREEZE o AL VERDE.', [
       {
         label: 'Attacco',
-        onClick: () => startOracleAttack(false)
+        onClick: () => {
+          state.round.oracleTokens[state.round.current] = 1;
+          state.round.oracleModes[state.round.current] = 'attack';
+          state.round.oracleAttackLocked[state.round.current] = true;
+          state.round.pending = null;
+          renderScoreboard();
+          showWheelResult('Oracolo Attacco ottenuto. Disponibile dopo il prossimo giro ruota.', 'res-special');
+          setTurnState('spin');
+        }
       },
       {
-        label: 'Conserva',
+        label: 'Scudo',
         secondary: true,
         onClick: () => {
           state.round.oracleTokens[state.round.current] = 1;
+          state.round.oracleModes[state.round.current] = 'defense';
+          state.round.oracleAttackLocked[state.round.current] = false;
           state.round.pending = null;
           renderScoreboard();
           showWheelResult('Scudo Oracolo conservato.', 'res-special');
@@ -316,23 +367,36 @@
   }
 
   function startOracleAttack(consumesStoredToken) {
+    const token = state.round.oracleTokens[state.round.current] || 0;
+    const mode = state.round.oracleModes[state.round.current];
+    if (token <= 0) {
+      feedback('msg-feedback', 'Nessun Oracolo disponibile per questo giocatore.', 'no');
+      return;
+    }
+    if (state.round.oracleAttackLocked[state.round.current]) {
+      feedback('msg-feedback', 'Attacco Oracolo disponibile dopo il prossimo giro di ruota.', 'no');
+      return;
+    }
+    if (mode !== 'attack') {
+      feedback('msg-feedback', 'Questo Oracolo e uno scudo.', 'no');
+      return;
+    }
     if (consumesStoredToken) {
-      state.round.oracleTokens[state.round.current] -= 1;
+      state.round.oracleTokens[state.round.current] = Math.max(0, (state.round.oracleTokens[state.round.current] || 0) - 1);
+      state.round.oracleModes[state.round.current] = null;
+      state.round.oracleAttackLocked[state.round.current] = false;
       renderScoreboard();
     }
-    state.round.pending = {
-      kind: 'oracleAttack',
-      value: 500,
-      phase: 'ask',
-      askedLetter: '',
-      consumesStoredToken
-    };
-    showWheelResult('ORACOLO Attacco: chiedi una consonante alla regia.', 'res-special');
-    setTurnState('letter', 'Consonante da chiedere alla regia:');
+    feedback('msg-feedback', 'ORACOLO Attacco usato: domanda alla regia.', 'ok');
   }
 
   function buyVowelAction() {
     if (state.round.pending) return;
+    if (state.round.points[state.round.current] < cfg.VOWEL_COST) {
+      feedback('msg-feedback', 'Servono almeno 400 punti nel round per comprare una vocale.', 'no');
+      setTurnState('spin');
+      return;
+    }
     state.round.pending = { kind: 'buyVowel' };
     setTurnState('letter', 'Compra una vocale per 400 punti:');
   }
@@ -451,6 +515,10 @@
     if (state.round.points[cur] < cfg.VOWEL_COST) {
       feedback('msg-feedback', 'Servono almeno 400 punti nel round per comprare una vocale.', 'no');
       $('lettera-input').value = '';
+      if (state.round.pending && state.round.pending.kind === 'buyVowel') {
+        state.round.pending = null;
+        setTurnState('spin');
+      }
       return;
     }
 
@@ -530,49 +598,13 @@
     nextTurn();
   }
 
-  function openSolve(context) {
-    solveContext = context || 'round';
-    $('solve-name').textContent = solveContext === 'flash' ? flashPlayerName() : currentPlayerName();
-    $('solve-input').value = '';
-    $('modal-solve').classList.remove('hidden');
-    setTimeout(() => $('solve-input').focus(), 60);
-  }
-
-  function confirmSolve() {
-    const answer = $('solve-input').value;
-    closeModal('modal-solve');
-    if (solveContext === 'flash') {
-      if (letters.solutionEquals(answer, state.flash.phraseNorm)) {
-        board.revealAll(state.flash.revealed);
-        modal('Round Flash', `${flashPlayerName()} vince lo spareggio.`, [{ label: 'OK' }]);
-      } else {
-        flashNextTurn();
-      }
-      return;
-    }
-
-    if (letters.solutionEquals(answer, state.round.phraseNorm)) {
-      state.round.points[state.round.current] += cfg.SOLVE_BONUS;
-      renderScoreboard();
-      board.revealAll(state.round.revealed);
-      setTimeout(() => endRound(state.round.current, 'solved'), 400);
-    } else {
-      feedback('msg-feedback', 'Soluzione errata: passa il turno.', 'no');
-      nextTurn();
-    }
-  }
-
   function revealSolution() {
-    modal('Mostra soluzione', 'Rivelare la frase senza assegnare il round?', [
-      {
-        label: 'Rivela',
-        onClick: () => {
-          board.revealAll(state.round.revealed);
-          endRound(null, 'shown');
-        }
-      },
-      { label: 'Annulla', secondary: true }
-    ]);
+    $('btn-reveal').disabled = true;
+    $('tabellone').classList.add('solution-complete');
+    state.round.points[state.round.current] += cfg.SOLVE_BONUS;
+    renderScoreboard();
+    board.revealAll(state.round.revealed);
+    setTimeout(() => endRound(state.round.current, 'solved'), 950);
   }
 
   function chooseManualWinner() {
@@ -585,6 +617,7 @@
   }
 
   function endRound(winnerIdx, reason) {
+    $('tabellone').classList.remove('solution-complete');
     const wheelRoman = currentWheel().roman;
     if (winnerIdx === null || winnerIdx === undefined) {
       state.match.history.push({ wheel: wheelRoman, reason, winnerIdx: null, points: state.match.players.map(() => 0) });
@@ -646,17 +679,18 @@
       const card = document.createElement('div');
       card.className = 'player-card' + (idx === state.round.current ? ' active' : '');
       const tokens = state.round.oracleTokens[idx] || 0;
+      const oracleIcon = state.round.oracleModes[idx] === 'attack' ? '⚔' : '🛡';
       card.innerHTML = `
         <div class="player-top">
           <span class="player-name">${idx === state.round.current ? '▶ ' : ''}${player.name}</span>
-          ${tokens ? `<span class="jolly-badge">Oracolo x${tokens}</span>` : ''}
+          ${tokens ? `<span class="jolly-badge">Oracolo ${oracleIcon}</span>` : ''}
         </div>
         <div class="player-points">${state.round.points[idx] || 0}<span class="pp-label"> pt round</span></div>
         <div class="player-total">Totale gioco: ${totals[idx] + (state.round.points[idx] || 0)}</div>`;
       list.appendChild(card);
     });
     renderManualButtons();
-    $('btn-use-oracle').disabled = state.round.oracleTokens[state.round.current] <= 0 || !!state.round.pending;
+    $('btn-use-oracle').disabled = state.round.spinning;
   }
 
   function renderManualButtons() {
@@ -743,6 +777,11 @@
     renderFlashPlayers();
   }
 
+  function revealFlashSolution() {
+    board.revealAll(state.flash.revealed);
+    feedback('flash-feedback', 'Soluzione mostrata.', 'ok');
+  }
+
   function checkFlashLetter() {
     const letter = letters.normalizeLetter($('flash-letter').value);
     if (!letter || !letters.isLetter(letter)) return;
@@ -764,26 +803,12 @@
     }
   }
 
-  function revealFlashSolution() {
-    modal('Mostra soluzione?', 'Vuoi rivelare la soluzione del Round Flash?', [
-      {
-        label: 'Mostra',
-        onClick: () => {
-          board.revealAll(state.flash.revealed);
-          modal('Soluzione Round Flash', `<b>${state.flash.phrase}</b>`);
-        }
-      },
-      { label: 'Annulla', secondary: true }
-    ]);
-  }
-
   function chooseFinal(type) {
     state.resetFinale();
     state.finale.type = type;
     $('final-input-title').textContent = type === 'board1' ? 'TABELLONE 1' : 'TASTIERA ROTTA';
     $('final-phrase-label').textContent = type === 'board1' ? 'Frase finale' : 'Frase cifrata da mostrare';
     $('final-phrase').value = '';
-    $('final-solution').value = '';
     showScreen('screen-final-input');
   }
 
@@ -795,7 +820,6 @@
     }
     state.finale.phrase = phrase.toUpperCase();
     state.finale.phraseNorm = letters.normalizeText(phrase);
-    state.finale.solution = $('final-solution').value.trim().toUpperCase();
     const isKeyboardBroken = state.finale.type === 'board2';
     board.renderBoard($('final-board'), state.finale.phrase, state.finale.phraseNorm, state.finale.revealed, { open: isKeyboardBroken });
     renderQwerty(!isKeyboardBroken);
@@ -812,28 +836,17 @@
       rowEl.className = 'qwerty-row';
       row.split('').forEach(ch => {
         const btn = document.createElement('button');
-      btn.textContent = ch;
-      btn.disabled = !clickable;
-      btn.addEventListener('click', () => {
-        state.finale.revealed.add(ch);
-        btn.classList.add('used');
-        board.revealLetter(ch);
-      });
+        btn.textContent = ch;
+        btn.disabled = !clickable;
+        btn.addEventListener('click', () => {
+          state.finale.revealed.add(ch);
+          btn.classList.add('used');
+          board.revealLetter(ch);
+        });
         rowEl.appendChild(btn);
       });
       wrap.appendChild(rowEl);
     });
-  }
-
-  function showFinalSolution() {
-    const solution = state.finale.solution || state.finale.phrase;
-    modal('Mostra soluzione?', 'Vuoi mostrare la soluzione del gioco finale?', [
-      {
-        label: 'Mostra',
-        onClick: () => modal('Soluzione', `<b>${solution}</b>`)
-      },
-      { label: 'Annulla', secondary: true }
-    ]);
   }
 
   function bindEvents() {
@@ -850,12 +863,9 @@
     $('lettera-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('lettera-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkLetter(); });
     $('frase-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+    $('tema-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('btn-buy-vowel').addEventListener('click', buyVowelAction);
     $('btn-use-oracle').addEventListener('click', () => startOracleAttack(true));
-    $('btn-solve').addEventListener('click', () => openSolve('round'));
-    $('btn-solve-cancel').addEventListener('click', () => closeModal('modal-solve'));
-    $('btn-solve-confirm').addEventListener('click', confirmSolve);
-    $('solve-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confirmSolve(); } });
     $('btn-reveal').addEventListener('click', revealSolution);
     $('btn-manual-winner').addEventListener('click', chooseManualWinner);
     $('btn-next-turn').addEventListener('click', nextTurn);
@@ -870,7 +880,6 @@
     $('btn-flash-letter').addEventListener('click', checkFlashLetter);
     $('btn-flash-timer').addEventListener('click', () => timers.start(cfg.TIMERS.flash, $('flash-timer'), () => modal('Tempo scaduto', 'Passa il turno.', [{ label: 'OK', onClick: flashNextTurn }])));
     $('btn-flash-reset').addEventListener('click', () => timers.reset(cfg.TIMERS.flash, $('flash-timer')));
-    $('btn-flash-give-solution').addEventListener('click', () => openSolve('flash'));
     $('btn-flash-solve').addEventListener('click', revealFlashSolution);
     $('btn-flash-next').addEventListener('click', flashNextTurn);
 
@@ -878,26 +887,25 @@
     $('btn-final-back').addEventListener('click', () => showScreen('screen-final-menu'));
     $('btn-final-open').addEventListener('click', openFinalBoard);
     $('final-phrase').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
-    $('final-solution').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('btn-final-timer').addEventListener('click', () => timers.start(cfg.TIMERS.final, $('final-timer'), () => modal('Tempo scaduto', 'Timer finale terminato.')));
     $('btn-final-reset').addEventListener('click', () => timers.reset(cfg.TIMERS.final, $('final-timer')));
-    $('btn-final-solution').addEventListener('click', showFinalSolution);
     $('btn-final-edit').addEventListener('click', () => showScreen('screen-final-input'));
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.modal-overlay').forEach(el => closeModal(el.id));
       }
     });
 
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', e => {
-        if (e.target === overlay) overlay.classList.add('hidden');
+        if (e.target === overlay) closeModal(overlay.id);
       });
     });
 
     window.addEventListener('resize', () => {
       if ($('screen-game').classList.contains('active')) {
+        board.renderBoard($('tabellone'), state.round.phrase, state.round.phraseNorm, state.round.revealed);
         wheelUi.resizeCanvas($('wheel-canvas'));
         wheelUi.draw($('wheel-canvas'), currentWheel(), state.round.rotation);
       }

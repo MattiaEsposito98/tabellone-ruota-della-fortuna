@@ -13,10 +13,13 @@
       wheelIdx: 0,
       phrase: '',
       phraseNorm: '',
+      theme: '',
       revealed: new Set(),
       called: new Set(),
       points: [],
       oracleTokens: [],
+      oracleModes: [],
+      oracleAttackLocked: [],
       current: 0,
       pending: null,
       spinning: false,
@@ -39,7 +42,6 @@
       type: 'board1',
       phrase: '',
       phraseNorm: '',
-      solution: '',
       revealed: new Set()
     };
   }
