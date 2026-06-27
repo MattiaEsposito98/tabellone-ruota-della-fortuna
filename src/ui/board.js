@@ -32,11 +32,16 @@
     const opts = options || {};
     const availableWidth = container.clientWidth || 900;
     const maxLettersPerRow = Math.max(14, Math.min(24, Math.floor(availableWidth / 58)));
+    const rows = splitPhrase(phrase, phraseNorm, maxLettersPerRow);
 
     container.innerHTML = '';
     container.classList.toggle('board-open', !!opts.open);
+    container.classList.toggle('board-compact', rows.length >= 5);
+    container.classList.toggle('board-dense', rows.length >= 6);
+    container.dataset.rowCount = String(rows.length);
+    container.dataset.letterCount = String(String(phraseNorm || '').replace(/[^A-Z]/g, '').length);
 
-    splitPhrase(phrase, phraseNorm, maxLettersPerRow).forEach(row => {
+    rows.forEach(row => {
       const line = document.createElement('div');
       line.className = 'linea-row';
       row.forEach(({ word, norm }) => {

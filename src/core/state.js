@@ -31,6 +31,7 @@
     return {
       phrase: '',
       phraseNorm: '',
+      theme: '',
       revealed: new Set(),
       called: new Set(),
       current: 0
@@ -42,6 +43,9 @@
       type: 'board1',
       phrase: '',
       phraseNorm: '',
+      solution: '',
+      solutionNorm: '',
+      theme: '',
       revealed: new Set()
     };
   }

@@ -186,16 +186,28 @@
     if (!canSpin) setTimeout(() => input.focus(), 60);
   }
 
-  function updateRoundTheme() {
-    const el = $('round-theme');
+  function updateThemeDisplay(id, theme) {
+    const el = $(id);
     if (!el) return;
-    if (state.round.theme) {
-      el.textContent = `Tema: ${state.round.theme}`;
+    if (theme) {
+      el.textContent = `Tema: ${theme}`;
       el.classList.remove('hidden');
     } else {
       el.textContent = '';
       el.classList.add('hidden');
     }
+  }
+
+  function updateRoundTheme() {
+    updateThemeDisplay('round-theme', state.round.theme);
+  }
+
+  function updateFlashTheme() {
+    updateThemeDisplay('flash-theme-display', state.flash.theme);
+  }
+
+  function updateFinalTheme() {
+    updateThemeDisplay('final-theme-display', state.finale.theme);
   }
 
   function nextTurn() {
@@ -753,8 +765,11 @@
     state.resetFlash();
     state.flash.phrase = phrase.toUpperCase();
     state.flash.phraseNorm = letters.normalizeText(phrase);
+    state.flash.theme = $('flash-theme').value.trim().toUpperCase();
     state.flash.current = 0;
+    $('flash-board').classList.remove('solution-complete');
     board.renderBoard($('flash-board'), state.flash.phrase, state.flash.phraseNorm, state.flash.revealed);
+    updateFlashTheme();
     timers.reset(cfg.TIMERS.flash, $('flash-timer'));
     renderFlashPlayers();
     showScreen('screen-flash-game');
@@ -778,6 +793,7 @@
   }
 
   function revealFlashSolution() {
+    $('flash-board').classList.add('solution-complete');
     board.revealAll(state.flash.revealed);
     feedback('flash-feedback', 'Soluzione mostrata.', 'ok');
   }
@@ -806,9 +822,13 @@
   function chooseFinal(type) {
     state.resetFinale();
     state.finale.type = type;
+    const isKeyboardBroken = type === 'board2';
     $('final-input-title').textContent = type === 'board1' ? 'TABELLONE 1' : 'TASTIERA ROTTA';
     $('final-phrase-label').textContent = type === 'board1' ? 'Frase finale' : 'Frase cifrata da mostrare';
     $('final-phrase').value = '';
+    $('final-solution').value = '';
+    $('final-solution-wrap').classList.toggle('hidden', !isKeyboardBroken);
+    $('final-theme').value = '';
     showScreen('screen-final-input');
   }
 
@@ -818,13 +838,33 @@
       $('final-phrase').focus();
       return;
     }
+    const isKeyboardBroken = state.finale.type === 'board2';
+    const solution = $('final-solution').value.trim();
+    if (isKeyboardBroken && !solution) {
+      $('final-solution').focus();
+      return;
+    }
     state.finale.phrase = phrase.toUpperCase();
     state.finale.phraseNorm = letters.normalizeText(phrase);
-    const isKeyboardBroken = state.finale.type === 'board2';
+    state.finale.solution = isKeyboardBroken ? solution.toUpperCase() : state.finale.phrase;
+    state.finale.solutionNorm = isKeyboardBroken ? letters.normalizeText(solution) : state.finale.phraseNorm;
+    state.finale.theme = $('final-theme').value.trim().toUpperCase();
+    state.finale.revealed = new Set();
+    $('final-board').classList.remove('solution-complete');
     board.renderBoard($('final-board'), state.finale.phrase, state.finale.phraseNorm, state.finale.revealed, { open: isKeyboardBroken });
+    updateFinalTheme();
     renderQwerty(!isKeyboardBroken);
     timers.reset(cfg.TIMERS.final, $('final-timer'));
     showScreen('screen-final-game');
+  }
+
+  function revealFinalSolution() {
+    $('final-board').classList.add('solution-complete');
+    if (state.finale.type === 'board2') {
+      state.finale.revealed = new Set();
+      board.renderBoard($('final-board'), state.finale.solution, state.finale.solutionNorm, state.finale.revealed, { open: true });
+    }
+    board.revealAll(state.finale.revealed);
   }
 
   function renderQwerty(clickable) {
@@ -875,6 +915,7 @@
 
     $('btn-flash-start').addEventListener('click', startFlash);
     $('flash-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+    $('flash-theme').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('flash-letter').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('flash-letter').addEventListener('keydown', e => { if (e.key === 'Enter') checkFlashLetter(); });
     $('btn-flash-letter').addEventListener('click', checkFlashLetter);
@@ -887,8 +928,11 @@
     $('btn-final-back').addEventListener('click', () => showScreen('screen-final-menu'));
     $('btn-final-open').addEventListener('click', openFinalBoard);
     $('final-phrase').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+    $('final-solution').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+    $('final-theme').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
     $('btn-final-timer').addEventListener('click', () => timers.start(cfg.TIMERS.final, $('final-timer'), () => modal('Tempo scaduto', 'Timer finale terminato.')));
     $('btn-final-reset').addEventListener('click', () => timers.reset(cfg.TIMERS.final, $('final-timer')));
+    $('btn-final-solve').addEventListener('click', revealFinalSolution);
     $('btn-final-edit').addEventListener('click', () => showScreen('screen-final-input'));
 
     document.addEventListener('keydown', e => {

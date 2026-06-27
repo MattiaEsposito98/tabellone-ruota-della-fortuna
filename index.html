@@ -25,16 +25,16 @@
     </div>
     <div class="mode-grid">
       <button class="mode-card" data-mode="main">
-        <span>Partita principale</span>
-        <small>Round I-IV, ruota, punteggi e regia</small>
+        <span>Partita Principale</span>
+        <small>Round I-IV, Ruota, Punteggi e Regia</small>
       </button>
       <button class="mode-card" data-mode="flash">
         <span>Round Flash</span>
         <small>Spareggio con timer manuale da 5 secondi</small>
       </button>
       <button class="mode-card" data-mode="finale">
-        <span>Gioco finale</span>
-        <small>Tabellone 1, Tastiera rotta e timer da 20 secondi</small>
+        <span>Gioco Finale</span>
+        <small>Fino Alla Fine, Tastiera Rotta e Timer da 20 secondi</small>
       </button>
     </div>
   </section>
@@ -101,9 +101,12 @@
       <main class="game-main">
         <div class="board-strip">
           <div class="action-rail" aria-label="Azioni principali">
-            <button id="btn-spin" class="round-action" title="Gira la ruota" aria-label="Gira la ruota">Gira ruota</button>
-            <button id="btn-buy-vowel" class="round-action" title="Compra vocale" aria-label="Compra vocale">Compra vocale</button>
-            <button id="btn-reveal" class="round-action" title="Mostra soluzione" aria-label="Mostra soluzione">Mostra soluzione</button>
+            <button id="btn-spin" class="round-action" title="Gira la ruota" aria-label="Gira la ruota">Gira
+              ruota</button>
+            <button id="btn-buy-vowel" class="round-action" title="Compra vocale" aria-label="Compra vocale">Compra
+              vocale</button>
+            <button id="btn-reveal" class="round-action" title="Mostra soluzione" aria-label="Mostra soluzione">Mostra
+              soluzione</button>
           </div>
           <div id="tabellone-container">
             <div id="tabellone"></div>
@@ -178,6 +181,8 @@
     <div class="input-card">
       <p class="input-label">Frase dello spareggio</p>
       <textarea id="flash-input" maxlength="100" rows="3" placeholder="Inserisci la frase"></textarea>
+      <p class="input-label">Tema</p>
+      <input id="flash-theme" maxlength="40" type="text" placeholder="Es: Proverbi, Cinema, Musica" />
       <button id="btn-flash-start">Apri tabellone</button>
       <button class="btn-link" data-home>← Menu iniziale</button>
     </div>
@@ -186,7 +191,10 @@
   <section id="screen-flash-game" class="screen">
     <div class="game-layout">
       <main class="game-main">
-        <div id="flash-board" class="final-board"></div>
+        <div class="standalone-board-wrap">
+          <div id="flash-board" class="final-board"></div>
+          <div id="flash-theme-display" class="round-theme standalone-theme hidden"></div>
+        </div>
         <div class="timer-panel">
           <div id="flash-timer" class="timer-display">05</div>
           <button id="btn-flash-timer">Start 5s</button>
@@ -224,11 +232,11 @@
     <div class="mode-grid">
       <button class="mode-card final-choice" data-final="board1">
         <span>Tabellone 1</span>
-        <small>Fino alla fine</small>
+        <small>Fino Alla Fine</small>
       </button>
       <button class="mode-card final-choice" data-final="board2">
         <span>Tabellone 2</span>
-        <small>La tastiera rotta</small>
+        <small>La Tastiera Rotta</small>
       </button>
     </div>
     <div class="screen-actions">
@@ -245,6 +253,12 @@
     <div class="input-card">
       <p class="input-label" id="final-phrase-label">Frase da indovinare</p>
       <textarea id="final-phrase" maxlength="100" rows="3" placeholder="Inserisci frase"></textarea>
+      <div id="final-solution-wrap" class="input-extra hidden">
+        <p class="input-label">Frase corretta</p>
+        <textarea id="final-solution" maxlength="100" rows="3" placeholder="Inserisci la soluzione reale"></textarea>
+      </div>
+      <p class="input-label">Tema</p>
+      <input id="final-theme" maxlength="40" type="text" placeholder="Es: Proverbi, Cinema, Musica" />
       <button id="btn-final-open">Apri tabellone</button>
       <button class="btn-link" id="btn-final-back">← Scegli tabellone</button>
     </div>
@@ -252,7 +266,10 @@
 
   <section id="screen-final-game" class="screen">
     <div class="final-layout">
-      <div id="final-board" class="final-board"></div>
+      <div class="standalone-board-wrap">
+        <div id="final-board" class="final-board"></div>
+        <div id="final-theme-display" class="round-theme standalone-theme hidden"></div>
+      </div>
       <div id="qwerty" class="qwerty"></div>
       <div class="timer-panel">
         <div id="final-timer" class="timer-display">20</div>
@@ -260,6 +277,7 @@
         <button id="btn-final-reset">Reset</button>
       </div>
       <div class="final-actions">
+        <button id="btn-final-solve">Mostra soluzione</button>
         <button id="btn-final-edit">Cambia frase</button>
         <button data-home>Menu iniziale</button>
       </div>

@@ -22,7 +22,7 @@
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
   font-family: 'Segoe UI', 'Arial Black', sans-serif;
   background: var(--bg);
   color: var(--white);
@@ -125,8 +125,11 @@ body {
 #frase-input,
 #tema-input,
 #flash-input,
+#flash-theme,
 #flash-letter,
-#final-phrase {
+#final-phrase,
+#final-solution,
+#final-theme {
   background: var(--cell-bg);
   border: 2px solid var(--yellow);
   border-radius: 8px;
@@ -145,8 +148,11 @@ body {
 #frase-input::placeholder,
 #tema-input::placeholder,
 #flash-input::placeholder,
+#flash-theme::placeholder,
 #flash-letter::placeholder,
-#final-phrase::placeholder {
+#final-phrase::placeholder,
+#final-solution::placeholder,
+#final-theme::placeholder {
   color: rgba(255, 255, 255, .3);
   font-weight: 400;
   letter-spacing: 1px;
@@ -155,10 +161,23 @@ body {
 #frase-input:focus,
 #tema-input:focus,
 #flash-input:focus,
+#flash-theme:focus,
 #flash-letter:focus,
-#final-phrase:focus {
+#final-phrase:focus,
+#final-solution:focus,
+#final-theme:focus {
   border-color: var(--white);
   box-shadow: 0 0 10px rgba(255, 193, 7, .4);
+}
+
+.input-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-extra.hidden {
+  display: none;
 }
 
 /* Pulsanti gialli principali */
@@ -357,16 +376,17 @@ body {
   align-items: stretch;
   padding: 10px;
   min-height: 100vh;
-  height: 100vh;
-  overflow: hidden;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
 }
 
 .game-layout {
   width: 100%;
   max-width: none;
-  height: calc(100vh - 20px);
-  min-height: 0;
+  min-height: calc(100vh - 20px);
+  height: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 286px;
   gap: 18px;
@@ -377,9 +397,82 @@ body {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 14px;
-  align-content: stretch;
+  grid-template-rows: auto auto auto;
+  gap: 28px;
+  align-content: start;
+}
+
+#screen-flash-game {
+  justify-content: stretch;
+  align-items: stretch;
+  padding: 10px;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#screen-flash-game .game-main {
+  grid-template-rows: auto auto auto auto;
+  justify-items: center;
+  align-content: start;
+  gap: 18px;
+  padding: 18px 0;
+  overflow: hidden;
+}
+
+#screen-flash-game .standalone-board-wrap {
+  align-items: center;
+  max-width: min(1040px, 100%);
+}
+
+#screen-flash-game .final-board {
+  min-height: 168px;
+  justify-content: center;
+  padding-block: 28px;
+}
+
+#screen-flash-game .standalone-theme {
+  align-self: flex-end;
+}
+
+#screen-flash-game .timer-panel {
+  width: auto;
+  max-width: none;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+#screen-flash-game #input-area-flash {
+  width: min(520px, 100%);
+  padding: 14px;
+  background: var(--bg2);
+  border: 2px solid rgba(255, 193, 7, .4);
+  border-radius: 12px;
+}
+
+#screen-flash-game .lettera-row {
+  justify-content: center;
+}
+
+#screen-flash-game #flash-letter {
+  width: 96px;
+  height: 54px;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+#screen-flash-game #btn-flash-letter {
+  min-width: 194px;
+}
+
+#screen-flash-game .game-actions {
+  width: min(520px, 100%);
+}
+
+#screen-flash-game .game-actions button {
+  flex: 1 1 150px;
 }
 
 .board-strip {
@@ -441,14 +534,14 @@ body {
 
 .play-row {
   display: grid;
-  grid-template-columns: minmax(260px, 520px) minmax(460px, 560px);
+  grid-template-columns: minmax(260px, 520px) minmax(360px, 760px);
   grid-template-areas: "input wheel";
   column-gap: 24px;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  height: auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ===================== TABELLONE ===================== */
@@ -493,11 +586,13 @@ body {
   right: 8px;
 }
 
-#tabellone.solution-complete {
+#tabellone.solution-complete,
+.final-board.solution-complete {
   animation: solution-complete-glow .42s ease-in-out infinite alternate;
 }
 
-#tabellone.solution-complete .cella.revealed {
+#tabellone.solution-complete .cella.revealed,
+.final-board.solution-complete .cella.revealed {
   box-shadow: 0 2px 8px rgba(0, 0, 0, .4), 0 0 18px rgba(255, 193, 7, .72), inset 0 1px 0 rgba(255, 255, 255, .12);
 }
 
@@ -543,6 +638,45 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .05);
   transition: background .3s, color .3s, box-shadow .3s, transform .2s;
   flex-shrink: 0;
+}
+
+#screen-game #tabellone.board-compact {
+  gap: 11px;
+  padding-block: clamp(18px, 2vh, 26px);
+}
+
+#screen-game #tabellone.board-compact .linea-row {
+  gap: 24px;
+}
+
+#screen-game #tabellone.board-compact .parola-row {
+  gap: 5px;
+}
+
+#screen-game #tabellone.board-compact .cella {
+  width: clamp(34px, 3.25vw, 49px);
+  height: clamp(42px, 3.95vw, 58px);
+  font-size: 1.26rem;
+}
+
+#screen-game #tabellone.board-dense {
+  gap: 8px;
+  padding-block: clamp(14px, 1.7vh, 20px);
+}
+
+#screen-game #tabellone.board-dense .linea-row {
+  gap: 18px;
+}
+
+#screen-game #tabellone.board-dense .parola-row {
+  gap: 4px;
+}
+
+#screen-game #tabellone.board-dense .cella {
+  width: clamp(31px, 2.9vw, 44px);
+  height: clamp(38px, 3.45vw, 52px);
+  border-width: 2px;
+  font-size: 1.12rem;
 }
 
 .cella.revealed {
@@ -619,6 +753,35 @@ body {
 
 .round-theme.hidden {
   display: none;
+}
+
+#screen-game #round-theme {
+  position: static !important;
+  grid-area: theme;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  align-self: start;
+  justify-self: end;
+  margin-top: 0;
+}
+
+.standalone-board-wrap {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 28px;
+}
+
+.standalone-board-wrap .final-board {
+  max-width: none;
+}
+
+.standalone-theme {
+  margin-top: 6px;
+  justify-self: auto;
 }
 
 .lettera-row {
@@ -707,7 +870,7 @@ body {
 .wheel-section {
   grid-area: wheel;
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -759,14 +922,42 @@ body {
 
 .wheel-stage {
   position: relative;
-  width: auto;
-  height: 100%;
+  width: min(560px, 39vw);
+  height: auto;
   max-width: min(560px, 39vw);
   max-height: 560px;
   aspect-ratio: 1/1;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#screen-game .game-main:has(#tabellone.board-dense) .wheel-stage {
+  width: min(400px, 32vw);
+  max-width: 400px;
+}
+
+@media (min-width:1200px) {
+  .wheel-section:has(.wheel-result:not(.hidden)) {
+    display: grid;
+    grid-template-columns: minmax(320px, 440px) minmax(190px, 260px);
+    grid-template-areas: "stage result";
+    column-gap: 18px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .wheel-section:has(.wheel-result:not(.hidden)) .wheel-stage {
+    grid-area: stage;
+    width: min(400px, 25vw);
+    max-width: 400px;
+  }
+
+  .wheel-section:has(.wheel-result:not(.hidden)) .wheel-result {
+    grid-area: result;
+    width: 100%;
+    align-self: center;
+  }
 }
 
 #wheel-canvas {
@@ -1344,7 +1535,8 @@ body {
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width:980px) {
-  #screen-game {
+  #screen-game,
+  #screen-flash-game {
     height: auto;
     overflow: auto;
   }
@@ -1359,6 +1551,10 @@ body {
     width: 100%;
     position: static;
     order: -1;
+  }
+
+  #screen-flash-game .game-main {
+    padding: 0;
   }
 
   .players-list {
